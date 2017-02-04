@@ -1,0 +1,45 @@
+//  This snippet will get an authentication token 
+//  from inContact's RESTful API
+//
+IF (test == true)
+{
+}
+//
+ASSIGN username=""
+ASSIGN password=""
+//
+//
+// 
+// Step 1. Create authorization key
+// AppName@VendorName:BusinessUnitNumber
+// 
+ASSIGN app_name = ""
+ASSIGN vendor_name = ""
+ASSIGN bu_num = ""
+//
+ASSIGN auth_key = "{app_name}@{vendor_name}:{bu_num}"
+ASSIGN auth_key_base64 = "RGV2UG9ydGFsNDU5MzIyOUBpbkNvbnRhY3Q6NDU5MzIyOQ=="
+//
+// Step 2. Request authentication token
+ASSIGN token_service_URL = "https://api.incontact.com/InContactAuthorizationServer/Token"
+//
+ASSIGN token_request = GetRESTProxy()
+token_request.AddHeader("Authorization","basic {auth_key_base64}")
+token_request.ContentType = "application/json"
+//
+ASSIGN http_method = "POST"
+ASSIGN payload_type = 0  // 0 for json; 1 for xml; 2 for raw?
+//
+DYNAMIC token_request_payload
+token_request_payload.grant_type = "password"
+token_request_payload.username = "{username}"
+token_request_payload.password = "{password}"
+token_request_payload.scope = ""
+//
+ASSIGN payload_contents_as_string = "{token_request_payload.asjson()}"
+//
+// Do the request, store the response
+ASSIGN response = token_request.MakeRestRequest(token_service_URL,payload_contents_as_string,payload_type,http_method)
+ASSIGN auth_token = "{response.access_token.$value}"
+//
+//
