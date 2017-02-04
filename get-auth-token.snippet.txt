@@ -10,17 +10,17 @@ ASSIGN username=""
 ASSIGN password=""
 
 // Step 1. Create authorization key
-// format is AppName@VendorName:BusinessUnitNumber
+// format is app_name@vendor_name:bu_num
  
 ASSIGN app_name = ""
 ASSIGN vendor_name = ""
 ASSIGN bu_num = ""
 
 ASSIGN auth_key = "{app_name}@{vendor_name}:{bu_num}"
-ASSIGN auth_key_base64 = "RGV2UG9ydGFsNDU5MzIyOUBpbkNvbnRhY3Q6NDU5MzIyOQ=="
+ASSIGN auth_key_base64 = ""
 
 //
-// Step 2. Use auth_key_base64 from above to request authentication token
+// The auth_key_base64 from above will be used to request auth token
 
 ASSIGN token_service_URL = "https://api.incontact.com/InContactAuthorizationServer/Token"
 
@@ -28,23 +28,29 @@ ASSIGN token_request = GetRESTProxy()
 token_request.AddHeader("Authorization","basic {auth_key_base64}")
 token_request.ContentType = "application/json"
 
+
+// HTTP verbs POST or GET
 ASSIGN http_method = "POST"
-ASSIGN payload_type = 0  // 0 for json; 1 for xml; 2 for raw?
 
-//
-// Create a dynamic data object to store the token request's payload
 
+// What format is the payload data in?
+// 0 for json; 1 for xml; 2 for raw?
+ASSIGN payload_type = 0
+
+
+// Create a dynamic data object (DDO) to store the token request's payload
 DYNAMIC token_request_payload
 token_request_payload.grant_type = "password"
 token_request_payload.username = "{username}"
 token_request_payload.password = "{password}"
 token_request_payload.scope = ""
 
+// Convert the contents of the DDO into a json (or xml) string
 ASSIGN payload_contents_as_string = "{token_request_payload.asjson()}"
 
-//
-// Do the request, store the response in the variable auth_to
+
+// Do the request, store the response in the variable auth_token
 ASSIGN response = token_request.MakeRestRequest(token_service_URL,payload_contents_as_string,payload_type,http_method)
 ASSIGN auth_token = "{response.access_token.$value}"
 
-// 
+// The variable auth_token is then used in subsequent method calls
